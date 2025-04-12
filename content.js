@@ -1,69 +1,74 @@
 let flag = false;
+let currentPathname = window.location.pathname;
+
+// Check if the ad container is active
+function checkAdContainer() {
+  const adContainer = document.querySelector(
+    "ytd-reel-video-renderer[is-active] #experiment-overlay ytd-ad-slot-renderer"
+  );
+  if (adContainer) {
+    console.log("Ad detected, skipping...");
+    flag = false;
+    chrome.runtime.sendMessage({ action: "progressComplete" });
+  }
+  return !!adContainer;
+}
+
+// Check if the video progress is near completion
 function checkProgressBar() {
-  if (document) {
-    // Get the progress bar element
-    var progressBar = document.querySelector('[aria-valuenow]');
-    
-    if (progressBar) {
-      // Get the aria-valuenow attribute value
-      var progressValue = progressBar.getAttribute("aria-valuenow");
-      
-      if (progressValue != 0 && progressValue>97) {
-        flag = true
-      } else if (progressValue == 0 && flag == true) {
-        flag = false
-        chrome.runtime.sendMessage({ action: "progressComplete" });
-      }
-    }
+  const progressBar = document.querySelector('[aria-valuenow]');
+  if (!progressBar) return;
+
+  const progressValue = parseFloat(progressBar.getAttribute("aria-valuenow"));
+  if (isNaN(progressValue)) return;
+
+  if (progressValue > 90) {
+    flag = true;
+  } else if (progressValue === 0 && flag) {
+    console.log("Progress completed. Requesting next short...");
+    flag = false;
+    chrome.runtime.sendMessage({ action: "progressComplete" });
   }
 }
 
-chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
-  // Check if the message indicates to click the button
+// Monitor if the URL path has changed (for Shorts navigation)
+function checkPathnameChange() {
+  if (window.location.pathname !== currentPathname) {
+    currentPathname = window.location.pathname;
+    console.log("Short changed:", currentPathname);
+
+    if (checkAdContainer()) return;
+
+    checkProgressBar();
+  }
+}
+
+// Respond to background message to click "Next" button
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === "clickButton") {
-      // Perform the button click
-      var button = document.querySelector("#navigation-button-down > ytd-button-renderer > yt-button-shape > button");
-      if (button) {
-        button.click();
-      } else {
-        console.log("Button not found.");
-      }
+    const button = document.querySelector(
+      "#navigation-button-down > ytd-button-renderer > yt-button-shape > button"
+    );
+    if (button) {
+      console.log("Clicking 'Next' button.");
+      button.click();
+    } else {
+      console.log("Navigation button not found.");
+    }
   }
 });
 
-let currentPathname = window.location.pathname;
-
-// Function to check for changes in the pathname
-function checkPathnameChange() {
-  if (window.location.pathname !== currentPathname) {
-      // Update the currentPathname variable
-      currentPathname = window.location.pathname;
-      if (checkAdContainer()) {
-        chrome.runtime.sendMessage({ action: "progressComplete" });
-      }
-
-      checkProgressBar();
-  }
-}
-
-// Handles ad shorts spearately
-const checkAdContainer = () => {
-  let adContainer = document.querySelector("ytd-reel-video-renderer[is-active] #experiment-overlay ytd-ad-slot-renderer")
-  if (adContainer) {
-    flag = false
-    chrome.runtime.sendMessage({ action: "progressComplete" });
-  }
-
-  return adContainer;
-}
-
-const check = () => {
-  chrome.storage.sync.get('extensionEnabled', function (data) {
+// Main check function, runs on interval
+function check() {
+  chrome.storage.local.get('extensionEnabled', (data) => {
     if (data.extensionEnabled) {
-      checkProgressBar();
       checkPathnameChange();
-    } 
+      checkProgressBar();
+    }
   });
 }
 
+// Run check every 500ms instead of 10ms to reduce load
 setInterval(check, 10);
+
+// TODO: bug fix - need to reload page for extension to work (reloading must be injecting the content script)

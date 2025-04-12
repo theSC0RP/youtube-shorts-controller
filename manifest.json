@@ -5,15 +5,17 @@
   "description": "Automatically navigates to the next YouTube short video.",
   "permissions": [
     "activeTab",
-    "tabs",
     "storage"
+  ],
+  "host_permissions": [
+    "*://*.youtube.com/shorts/*"
   ],
   "background": {
     "service_worker": "background.js"
   },
   "content_scripts": [
     {
-      "matches": ["*://*.youtube.com/*"],
+      "matches": ["*://*.youtube.com/shorts/*"],
       "js": ["content.js"]
     }
   ],
