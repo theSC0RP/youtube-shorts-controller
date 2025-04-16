@@ -25,7 +25,9 @@ This Chrome extension enhances the experience of watching YouTube Shorts by prov
 
 <li>Voice recognition runs in the background, listening for specific commands and triggering corresponding actions on the video player.</li>
 </ul>
+
 <hr>
+
 #### 🛠️ TODO
 
 - [ ] Fix content script injection to work without requiring page reload
