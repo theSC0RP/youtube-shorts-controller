@@ -12,15 +12,32 @@
         <h3>YouTube Shorts Controller</h3>
     </div>
     <p>Enabling the extension will auto-play the youtube shorts instead of looping a video. </p>
+    <hr>
 
-    <div class="switch-container">
-        <span>Disable</span>
-        <label class="switch">
-          <input type="checkbox" id="toggleExtension">
-          <span class="slider round"></span>
-        </label>
-        <span>Enable</span>
+    <div class="switch-label-container">
+        <p class="switch-label">Extension</p>
+        <div class="switch-container">
+            <span>Disable</span>
+            <label class="switch">
+                <input type="checkbox" id="toggleExtension">
+                <span class="slider round"></span>
+            </label>
+            <span>Enable</span>
+        </div>
     </div>
+
+    <div class="switch-label-container">
+        <p class="switch-label">Voice Commands. </p>
+        <div class="switch-container">
+            <span>Disable</span>
+            <label class="switch">
+                <input type="checkbox" id="toggleVoiceCommand">
+                <span class="slider round"></span>
+            </label>
+            <span>Enable</span>
+        </div>
+    </div>
+
     <script src="popup.js"></script>
 </body>
 </html>

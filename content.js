@@ -68,7 +68,79 @@ function check() {
   });
 }
 
+chrome.storage.local.get(['voiceCommandsEnabled'], (data) => {
+  if (data.voiceCommandsEnabled) {
+    console.log("Voice command is enabled. Starting recognition...");
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      console.warn("SpeechRecognition API is not supported in this browser.");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = "en-US";
+    recognition.continuous = true;
+    recognition.interimResults = false;
+    
+    console.log(recognition)
+    recognition.onresult = function (event) {
+      console.log(event)
+      const command = event.results[event.results.length - 1][0].transcript.trim().toLowerCase();
+      console.log("Recognized command:", command);
+
+      const video = document.querySelector(
+        "#shorts-player > div.html5-video-container > video"
+      );
+      if (!video) {
+        console.log("Video element not found.");
+        return;
+      }
+
+      switch (command) {
+        case "play":
+          video.play();
+          break;
+        case "pause":
+          video.pause();
+          break;
+        case "next":
+        case "front":
+          const nextBtn = document.querySelector(
+            "#navigation-button-down > ytd-button-renderer > yt-button-shape > button"
+          );
+          nextBtn?.click();
+          break;
+        case "back":
+          const backBtn = document.querySelector(
+            "#navigation-button-up > ytd-button-renderer > yt-button-shape > button"
+          );
+          backBtn?.click();
+          break;
+        default:
+          console.log("Unknown command:", command);
+      }
+    };
+
+    recognition.onerror = function (event) {
+      console.error("Speech recognition error:", event.error);
+      recognition.start()
+    };
+
+    recognition.onend = function () {
+      console.log("Speech recognition ended. Restarting...");
+      recognition.start(); // Keep it listening
+    };
+
+    recognition.start();
+  } else {
+    console.log("Voice command is disabled.");
+  }
+});
+
 // Run check every 500ms instead of 10ms to reduce load
 setInterval(check, 10);
 
-// TODO: bug fix - need to reload page for extension to work (reloading must be injecting the content script)
+// TODO: 
+// bug fix - need to reload page for extension to work (reloading must be injecting the content script)
+// reduce the time needed to for voice command to take the desired action

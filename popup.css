@@ -1,19 +1,29 @@
 body {
-  width: 220px;
+  width: 248px;
   font-family: Arial, sans-serif;
-  padding: 0px 10px;
+  padding: 0px 8px;
 }
+
 body .extension-name-container {
   display: flex;
   width: 100%;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   margin-bottom: 10px;
 }
 
 body .yt-shorts-controller-icon {
   width: 35px;
   height: 35px;
+}
+
+.switch-label-container {
+  display: flex;
+  justify-content: space-between;
+}
+
+.switch-label {
+  font-weight: 600;
 }
 
 .switch-container {
